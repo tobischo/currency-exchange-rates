@@ -1,0 +1,12 @@
+A Django app which fetches the exchange rates Euro To USD and Euro To GBP
+from the German Bundesbank server in CSV form, stores them in a local database
+and visualizes the data using jqplot.
+
+Used technologies:
+Python
+Django
+HTML(5)
+JavaScript
+jQuery
+jqPlot
+Ajax
