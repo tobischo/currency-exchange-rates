@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head class="html5">
+    <meta charset="utf-8" />
+    <title>{% block title %}{% endblock %}</title>
+    <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="/static/jqplot/excanvas.min.js"></script><![endif]-->
+    <script type="text/javascript" src="/static/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="/static/jqplot/jquery.jqplot.min.js"></script>
+    <script type="text/javascript" src="/static/jqplot/plugins/jqplot.highlighter.min.js"></script>
+    <script type="text/javascript" src="/static/jqplot/plugins/jqplot.dateAxisRenderer.min.js"></script>
+    <script type="text/javascript" src="/static/jqplot/plugins/jqplot.moving_average.js"></script>
+    <script type="text/javascript" src="/static/jqplot/plugins/jqplot.cursor.min.js"></script>
+    <script type="text/javascript" src="/static/jqui/js/jquery-ui-1.8.21.custom.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="/static/jqplot/jquery.jqplot.min.css" />
+    <link rel="stylesheet" type="text/css" href="/static/jqui/css/ui-lightness/jquery-ui-1.8.21.custom.css" />
+    {% block js %}{% endblock %}
+
+</head>
+<body>
+    <header>
+        <h1></h1>
+    </header>  
+    <section>
+        {% block content %}{% endblock %}
+    </section
+    <footer>
+
+    </footer>
+</body>
+</html>

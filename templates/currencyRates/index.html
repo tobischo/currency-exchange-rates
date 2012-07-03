@@ -1,0 +1,172 @@
+{% extends "currencyRates/layout.html" %}
+{% block content %}
+<button id="update">Update Server Data</button>
+<section id="chartdiv" style="height: 300px; width: 600px;"></section>
+<button id="reset">Reset Zoom</button>
+<section>
+    <header>
+        <h2>Filter</h2>
+    </header>
+    <fieldset>
+        <legend>Period</legend>
+        <input type="text" id="startdate" name="startdate" value="" /> Startdate <br />
+        <input type="text" id="enddate" name="enddate" value="" /> Enddate <br />
+    </fieldset>
+    <fieldset>
+        <legend>Grouping</legend>
+        <input type="radio" name="interval" value="d" checked /> by Day <br />
+        <input type="radio" name="interval" value="w" /> by Week <br />
+        <input type="radio" name="interval" value="m" /> by Month <br />   
+    </fieldset>
+    <fieldset>
+        <legend>Exchange Rate</legend>
+        {% for currency in currencyList %}
+            <input type="radio" name="currency" value="{{currency}}" /> {{currency}} <br />
+        {% endfor %}
+
+    </fieldset>
+    <button id="search">Search</button>
+</section>
+{% endblock %}
+
+
+{% block title %}
+Currency Exchange Rates
+{% endblock %}
+
+
+{% block js %}
+<script type="text/javascript"> 
+
+
+    var plot1
+
+    $(document).ready(function(){
+
+        //precheck first currency without template logic
+        $("input[name=currency]").first().attr('checked', true);
+
+        //define jquery ui datepicker for start and enddate
+        $("#startdate").datepicker({maxDate: 0, 
+                                    changeMonth: true, 
+                                    changeYear: true, 
+                                    dateFormat: "yy-mm-dd",
+                                    showOtherMonths: true,
+			                        selectOtherMonths: true,
+                                    showWeek: true,
+                        			firstDay: 1,
+                                    onSelect: function( selectedDate ) {
+                        				$( "#enddate" ).datepicker( "option", "minDate", selectedDate )
+                        			    }
+                                    })
+        $("#enddate").datepicker({maxDate: 0, 
+                                    changeMonth: true, 
+                                    changeYear: true, 
+                                    dateFormat: "yy-mm-dd",
+                                    showOtherMonths: true,
+			                        selectOtherMonths: true,
+                                    showWeek: true,
+                        			firstDay: 1,
+                                    onSelect: function( selectedDate ) {
+                        				$( "#startdatedate" ).datepicker( "option", "maxDate", selectedDate )
+                        			    }
+                                    })
+
+        //load data and draw graph on first page load
+        loadfilterdata()
+
+        //load new data to the server
+        $('#update').click(function(){
+            $.ajax({
+                async: true,
+                cache: false,
+                url: '/currencyRates/update',
+                success: function(res){
+                    loadfilterdata()
+                }
+            })
+        })
+
+        $('#search').click(function(){loadfilterdata()})
+
+        $('#reset').click(function(){plot1.resetZoom()})
+    })
+
+    //load data from server and redraw graph
+    function loadfilterdata(){
+
+        $.ajax({
+            async: true,
+            cache: false,
+            data: {"startdate":$('#startdate').val(),
+                   "enddate":$('#enddate').val(),
+                   "interval":$("input[name=interval]:checked").val(),
+                   "currency":$("input[name=currency]:checked").val()
+                    },
+            url: '/currencyRates/loaddata',
+            success: function(res){
+                if(res.length > 1){
+
+                    //set the reference to enable usage of reset zoom button
+                    plot1 = $.jqplot('chartdiv',  
+                                    [res], 
+                                    chartOptions($("input[name=currency]:checked").val()))
+                    plot1.replot()
+
+                }
+                else{
+                    alert("Cannot plot data with less than 2 entries")
+                }
+            }
+        });
+    }
+
+    //configuration options for graph
+    function chartOptions(currency){
+        $.jqplot.config.enablePlugins = true;
+
+        return {
+            title: '',
+            series: [{ 
+	            label: currency, 
+    	        neighborThreshold: -1,
+    	        showMarker: false,
+	    	    movingAverage: {
+	                color: '#cc0000',
+	                label: 'Moving Average',
+                    show: true,
+                    period: 30
+	    	    }
+    	    }],
+            axes:{
+                xaxis:{
+                    renderer:$.jqplot.DateAxisRenderer,
+                    tickOptions:{formatString:'%Y-%m-%d'} 
+                },
+                yaxis:{
+                    tickOptions:{
+                        formatString: '%.5f'
+                    }
+                }
+            },
+            highlighter: {
+                show: true,
+                sizeAdjust: 3.5
+            },
+            cursor: {  
+                showVerticalLine:false,
+                showHorizontalLine:false,
+                showCursorLegend:false,
+                showTooltip: true,
+                zoom:true
+	        },
+	        legend: {
+    	    	textColor: '#00b100',
+    			show: true,
+    			location: 'nw'
+    	    }
+        }
+    }
+
+</script>
+{% endblock %}
